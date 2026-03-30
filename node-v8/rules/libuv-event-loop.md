@@ -54,6 +54,79 @@ The event loop is the heart of Node.js's asynchronous model. Understanding its p
        └────────────────┘
 ```
 
+## queueMicrotask() vs. process.nextTick()
+
+Both defer execution, but they use different queues and have different ordering depending
+on the module system.
+
+### Execution order — CJS
+
+In CommonJS, `nextTick` fires before microtasks (including `queueMicrotask` and Promises):
+
+```javascript
+// CJS module
+Promise.resolve().then(() => console.log('promise'));
+queueMicrotask(() => console.log('microtask'));
+process.nextTick(() => console.log('nextTick'));
+// Output:
+// nextTick
+// promise
+// microtask
+```
+
+### Execution order — ESM
+
+In ES Modules, the file is itself processed inside the microtask queue, so
+`queueMicrotask()` fires **before** `process.nextTick()`:
+
+```javascript
+// ESM module (.mjs or "type": "module")
+import { nextTick } from 'node:process';
+Promise.resolve().then(() => console.log('promise'));
+queueMicrotask(() => console.log('microtask'));
+nextTick(() => console.log('nextTick'));
+// Output:
+// promise
+// microtask
+// nextTick   ← reversed compared to CJS!
+```
+
+### When to use which
+
+| | `process.nextTick()` | `queueMicrotask()` |
+|-|----------------------|--------------------|
+| Queue | nextTick queue | Microtask queue (same as Promise) |
+| Portable across CJS/ESM | ⚠️ order differs | ✅ consistent with Promises |
+| Pass arguments | ✅ `nextTick(fn, a, b)` | ❌ use closure/bind |
+| Error handling | `process.on('uncaughtException')` | same |
+| Recommendation | When you need nextTick-specific behavior | All other cases |
+
+**Rule of thumb:** prefer `queueMicrotask()` for new code — it's a web-standard API,
+consistent with Promise ordering, and works predictably across CJS and ESM.
+
+```javascript
+// GOOD: portable, consistent with Promise semantics
+queueMicrotask(() => processNextItem());
+
+// Use nextTick only when you need argument passing without closure:
+process.nextTick(doWork, arg1, arg2);
+// equivalent to (but slightly more efficient than):
+queueMicrotask(() => doWork(arg1, arg2));
+```
+
+### Starvation applies to both
+
+Just like `process.nextTick()`, recursive `queueMicrotask()` will starve I/O:
+
+```javascript
+// BAD: starves the event loop
+function loop() { queueMicrotask(loop); }
+loop();
+
+// GOOD: use setImmediate for recursion that should yield to I/O
+function loop() { setImmediate(loop); }
+```
+
 ## setTimeout vs setImmediate
 
 Within an I/O callback, `setImmediate` always fires before `setTimeout(fn, 0)`:

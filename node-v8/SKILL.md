@@ -76,6 +76,10 @@ the V8 engine, libuv event loop, thread pool, streams, worker threads, and nativ
 
 ### Scaling & Parallelism
 
+- [rules/cluster.md](rules/cluster.md)
+  Multi-core scaling with separate processes, round-robin load balancing, IPC between primary
+  and workers, graceful rolling restart, shared-state problem and alternatives (Redis, worker_threads).
+
 - [rules/worker-threads-internals.md](rules/worker-threads-internals.md)
   Worker creation (separate V8 isolate + libuv loop), `MessageChannel` / structured clone,
   transfer lists (zero-copy), `SharedArrayBuffer`, `Atomics` (wait/notify, CAS),
@@ -84,6 +88,24 @@ the V8 engine, libuv event loop, thread pool, streams, worker threads, and nativ
 - [rules/child-process-internals.md](rules/child-process-internals.md)
   `spawn`/`fork`/`exec` flow, IPC channel setup, handle passing across processes,
   stdio configuration, process pools, graceful shutdown patterns.
+
+### Binary Data & Events
+
+- [rules/buffer.md](rules/buffer.md)
+  `Buffer.alloc` vs `allocUnsafe`, internal pool mechanics, encodings, binary read/write,
+  slicing (shared memory gotcha), efficient concatenation, pooling patterns, ArrayBuffer interop.
+
+- [rules/events.md](rules/events.md)
+  EventEmitter internals, the `error` event, `maxListeners` and leak warning, common listener
+  leak patterns and fixes, async listeners / `captureRejections`, `events.once`, `events.on`
+  async iterator.
+
+### Context & Observability
+
+- [rules/async-local-storage.md](rules/async-local-storage.md)
+  `AsyncLocalStorage` for request-scoped context propagation (request ID, trace ID, auth context)
+  without prop-drilling. `run()` / `getStore()` / `exit()`, context loss scenarios, `AsyncResource.bind`,
+  `snapshot()`, memory leak pitfalls, singleton module pattern.
 
 ### Memory & Performance Debugging
 
