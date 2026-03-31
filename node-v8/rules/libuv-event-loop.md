@@ -127,6 +127,13 @@ loop();
 function loop() { setImmediate(loop); }
 ```
 
+## Node.js 20+ timer behavior change
+
+Starting with libuv 1.45.0 (Node.js 20), timers run **only after the poll phase**,
+instead of both before and after it as in earlier versions. This can affect the
+relative ordering of `setImmediate()` and `setTimeout()` in edge cases. When in
+doubt, test timer-sensitive code on the Node.js version you actually deploy.
+
 ## setTimeout vs setImmediate
 
 Within an I/O callback, `setImmediate` always fires before `setTimeout(fn, 0)`:

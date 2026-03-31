@@ -7,6 +7,24 @@ metadata:
 
 # Node.js Streams Internals
 
+## .pipe() does NOT propagate errors — always use pipeline()
+
+```javascript
+// BAD: if gzip fails, the write stream is not destroyed — file descriptor leak
+const inp = fs.createReadStream('file.mkv');
+const gz  = zlib.createGzip();
+const out = fs.createWriteStream('file.mkv.gz');
+inp.pipe(gz).pipe(out); // error in gz → out stays open
+
+// GOOD: pipeline() destroys all streams on error and calls callback when done
+const { pipeline } = require('node:stream/promises');
+await pipeline(
+  fs.createReadStream('file.mkv'),
+  zlib.createGzip(),
+  fs.createWriteStream('file.mkv.gz')
+);
+```
+
 ## Stream types
 
 - **Readable** — source of data (`fs.createReadStream`, `http.IncomingMessage`)

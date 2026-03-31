@@ -89,6 +89,22 @@ the V8 engine, libuv event loop, thread pool, streams, worker threads, and nativ
   `spawn`/`fork`/`exec` flow, IPC channel setup, handle passing across processes,
   stdio configuration, process pools, graceful shutdown patterns.
 
+### Security & Production
+
+- [rules/security.md](rules/security.md)
+  HTTP DoS and Slowloris mitigation (server timeouts), timing attacks (`timingSafeEqual`),
+  prototype pollution patterns and fixes, DNS rebinding (never `--inspect` in prod),
+  HTTP request smuggling, path traversal, subprocess injection, dependency hygiene.
+
+- [rules/dont-block-event-loop.md](rules/dont-block-event-loop.md)
+  REDOS (exponential regex — the most common accidental DoS vector), dangerous sync APIs
+  complete list, JSON DoS, task partitioning pattern, Worker Pool starvation via large files.
+
+- [rules/production.md](rules/production.md)
+  `NODE_ENV=production` (always set it), why branching on `NODE_ENV` in your own code is
+  an antipattern, 12-factor config via env vars, startup validation, graceful shutdown,
+  `uncaughtException` / `unhandledRejection`, running in Docker (PID 1 problem).
+
 ### Binary Data & Events
 
 - [rules/buffer.md](rules/buffer.md)
