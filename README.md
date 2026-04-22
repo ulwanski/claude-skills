@@ -1,6 +1,7 @@
 # claude-skills
 
 **What is a Claude Skill?**
+
 A Claude Skill is a structured knowledge pack loaded into Claude's context when working on specific tasks. Instead of relying solely on general training data, Claude reads targeted rule files that contain precise, opinionated guidance - effectively giving Claude "expert mode" on a subject.
 
 ## nodejs-core
